@@ -38,10 +38,9 @@ public class PasswordService {
 
         try {
 
-            log.debug("username: {}", username);
-            log.debug("password: {}", username);
+            log.info("Username: {}", username);
 
-            log.info("Validating user '{}' in the main base.", username);
+            log.info("Validating user in the main base.");
 
             var tempPassword = temporaryPasswordRepository.findById(username);
 
@@ -52,20 +51,20 @@ public class PasswordService {
 
             if (tempPassword.isPresent()) {
 
-                log.info("User '{}' exists.", username);
-                log.info("User '{}' has a reset in progress.", username);
+                log.info("User exists.");
+                log.info("User has a reset in progress.");
 
                 try {
 
                     String password = securityService.decrypt(encryptedPassword);
 
                     if (HashCrypt.matches(password, tempPassword.get().value())) {
-                        log.info("User '{}' was authenticated with success.", username);
+                        log.info("User was authenticated with success.");
                         return ResultCodeEnum.SUCCESS_TEMP_CODE;
                     }
 
                 } catch (SecurityException e) {
-                    log.error("User '{}' was input invalid password. It will be counted as an attempt.", username, e);
+                    log.error("User was input invalid password. It will be counted as an attempt.", e);
                 }
             }
 
