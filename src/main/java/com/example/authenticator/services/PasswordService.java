@@ -66,7 +66,7 @@ public class PasswordService {
             if (authenticationResult.failed())
                 attemptsService.notify(username);
 
-            return new ResultCodeAndData<>(authenticationResult, null);
+            return new ResultCodeAndData<>(authenticationResult);
 
         } catch (Exception e) {
             log.error("An unknown error has ocurred while authenticating.", e);
@@ -87,11 +87,11 @@ public class PasswordService {
         var authorizationResult = userService.isAuthorized(username);
 
         if (authorizationResult.failed()) {
-            return new ResultCodeAndData<>(authorizationFailedResult(authorizationResult), null);
+            return new ResultCodeAndData<>(authorizationFailedResult(authorizationResult));
         }
 
         if (tempPasswordHasIssued(username))
-            return new ResultCodeAndData<>(userHasResetProcess(username), null);
+            return new ResultCodeAndData<>(userHasResetProcess(username));
 
         String tempPassword = createTemporaryPassword(username);
 
@@ -99,7 +99,7 @@ public class PasswordService {
 
         if (notificationResult.failed()) {
             removeTemporaryPassword(username);
-            return new ResultCodeAndData<>(notificationResult, null);
+            return new ResultCodeAndData<>(notificationResult);
         }
 
         return new ResultCodeAndData<>(ResultCodeEnum.SUCCESS_RESET_CODE,
