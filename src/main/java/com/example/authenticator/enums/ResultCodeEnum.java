@@ -24,6 +24,6 @@ public enum ResultCodeEnum {
     }
 
     public boolean failed() {
-        return !this.equals(SUCCESS_CODE);
+        return !this.value.startsWith("0"); //SUCCESS START WITH 0
     }
 }

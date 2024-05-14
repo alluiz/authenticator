@@ -14,18 +14,22 @@ import java.util.UUID;
 public class PasswordService {
 
     private final TemporaryPasswordRepository temporaryPasswordRepository;
+    private final TemporaryPasswordRepository passwordRepository;
+
     private final SecurityService securityService;
     private final NotificationService notificationService;
     private final UserService userService;
     private final AttemptsService attemptsService;
 
     public PasswordService(TemporaryPasswordRepository temporaryPasswordRepository,
+                           TemporaryPasswordRepository passwordRepository,
                            SecurityService securityService,
                            NotificationService notificationService,
                            UserService userService,
                            AttemptsService attemptsService) {
 
         this.temporaryPasswordRepository = temporaryPasswordRepository;
+        this.passwordRepository = passwordRepository;
         this.securityService = securityService;
         this.notificationService = notificationService;
         this.userService = userService;
@@ -45,30 +49,16 @@ public class PasswordService {
             if (authorizationResult.failed())
                 return authorizationResult;
 
-            var tempPassword = temporaryPasswordRepository.findById(username);
+            var hasIssuedTempPassword = temporaryPasswordRepository.existsById(username);
 
-            if (tempPassword.isPresent()) {
+            var authenticationResult = hasIssuedTempPassword?
+                    authenticateWithTemporaryPassword(username, encryptedPassword) :
+                    authenticatePassword(username, encryptedPassword);
 
-                log.info("User exists.");
-                log.info("User has a reset in progress.");
+            if (authenticationResult.failed())
+                attemptsService.notify(username);
 
-                try {
-
-                    String password = securityService.decrypt(encryptedPassword);
-
-                    if (HashCrypt.matches(password, tempPassword.get().value())) {
-                        log.info("User was authenticated with success.");
-                        return ResultCodeEnum.SUCCESS_TEMP_CODE;
-                    }
-
-                } catch (SecurityException e) {
-                    log.error("User was input invalid password. It will be counted as an attempt.", e);
-                }
-            }
-
-            attemptsService.notify(username);
-
-            return ResultCodeEnum.ERROR_USER_PASSWORD_CODE;
+            return authenticationResult;
 
         } catch (Exception e) {
             log.error("An unknown error has ocurred while authenticating.", e);
@@ -107,6 +97,47 @@ public class PasswordService {
         } catch (Exception e) {
             return ResultCodeEnum.ERROR_CODE;
         }
+
+    }
+
+    private ResultCodeEnum authenticatePassword(String username, String encryptedPassword) {
+
+        var password = passwordRepository.findById(username);
+
+        if (password.isEmpty())
+            return ResultCodeEnum.ERROR_USER_PASSWORD_CODE;
+
+        return authenticateHash(encryptedPassword, password.get().value());
+
+    }
+
+    private ResultCodeEnum authenticateWithTemporaryPassword(String username, String encryptedPassword) {
+
+        var temporaryPassword = temporaryPasswordRepository.findById(username);
+
+        if (temporaryPassword.isEmpty())
+            return ResultCodeEnum.ERROR_USER_PASSWORD_CODE;
+
+        return authenticateHash(encryptedPassword, temporaryPassword.get().value());
+
+    }
+
+    private ResultCodeEnum authenticateHash(String encryptedPassword, String passwordHash) {
+
+        try {
+
+            String password = securityService.decrypt(encryptedPassword);
+
+            if (HashCrypt.matches(password, passwordHash)) {
+                log.info("User was authenticated with success.");
+                return ResultCodeEnum.SUCCESS_TEMP_CODE;
+            }
+
+        } catch (SecurityException e) {
+            log.error("User was input invalid password. It will be counted as an attempt.", e);
+        }
+
+        return ResultCodeEnum.ERROR_USER_PASSWORD_CODE;
 
     }
 
