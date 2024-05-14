@@ -89,7 +89,7 @@ public class PasswordService {
             if (tempPasswordHasIssued(username))
                 return userHasResetProcess(username);
 
-            String tempPassword = getTempPassword();
+            String tempPassword = generateTemporaryPassword();
 
             String hashPassword = HashCrypt.hash(tempPassword);
 
@@ -138,7 +138,7 @@ public class PasswordService {
         return attempts.map(AuthenticationAttemptEntity::attempts).orElse(0);
     }
 
-    private static String getTempPassword() {
+    private static String generateTemporaryPassword() {
 
         log.info("Generating temp password...");
 
