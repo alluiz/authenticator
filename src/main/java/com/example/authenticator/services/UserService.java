@@ -23,6 +23,30 @@ public class UserService {
         this.blackListService = blackListService;
     }
 
+    public boolean exists(String username) {
+
+        log.info("Checking if user exists...");
+        var exists = userRepository.existsById(username);
+        log.info("User exists: {}", exists);
+
+        return exists;
+    }
+
+    public ResultCodeEnum create(UserRequest userRequest) {
+
+        String username = userRequest.username();
+
+        log.info("Creating user: {}", username);
+
+        if (exists(username))
+            return userAlreadyExistsResult();
+
+        var user = new UserEntity(username);
+        saveUser(user);
+
+        return userWasCreatedResult();
+    }
+
     public ResultCodeEnum isAuthorized(String username) {
 
         if (attemptsService.check(username))
@@ -33,60 +57,6 @@ public class UserService {
 
         return ResultCodeEnum.SUCCESS_CODE;
 
-    }
-
-    private ResultCodeEnum userBlockedByBlackList() {
-
-        log.info("User was blocked by blacklist.");
-        return ResultCodeEnum.ERROR_USER_BLOCKED_CODE;
-
-    }
-
-    private ResultCodeEnum userBlockedByAttempts() {
-
-        log.info("User was blocked by attempts.");
-        return ResultCodeEnum.ERROR_TEMP_USER_BLOCKED;
-
-    }
-
-    public ResultCodeEnum create(UserRequest userRequest) {
-
-        String username = userRequest.username();
-
-        log.info("Creating user: {}", username);
-
-        if (userExists(username))
-            return userAlreadyExistsResult();
-
-        var user = new UserEntity(username);
-        saveUser(user);
-
-        return userWasCreatedResult();
-    }
-
-    private static ResultCodeEnum userWasCreatedResult() {
-        log.info("User was created.");
-        return ResultCodeEnum.SUCCESS_CREATE_USER_CODE;
-    }
-
-    private void saveUser(UserEntity user) {
-        log.info("Saving user...");
-        userRepository.save(user);
-        log.info("User was saved.");
-    }
-
-    private boolean userExists(String username) {
-
-        log.info("Checking if user exists...");
-        var exists = userRepository.existsById(username);
-        log.info("User exists: {}", exists);
-
-        return exists;
-    }
-
-    private static ResultCodeEnum userAlreadyExistsResult() {
-        log.error("User already exists.");
-        return ResultCodeEnum.ERROR_USER_ALREADY_EXISTS_CODE;
     }
 
     public ResultCodeEnum remove(String username) {
@@ -100,5 +70,35 @@ public class UserService {
             return ResultCodeEnum.ERROR_CODE;
         }
 
+    }
+
+    private ResultCodeEnum userAlreadyExistsResult() {
+        log.error("User already exists.");
+        return ResultCodeEnum.ERROR_USER_ALREADY_EXISTS_CODE;
+    }
+
+    private ResultCodeEnum userBlockedByAttempts() {
+
+        log.info("User was blocked by attempts.");
+        return ResultCodeEnum.ERROR_TEMP_USER_BLOCKED;
+
+    }
+
+    private ResultCodeEnum userBlockedByBlackList() {
+
+        log.info("User was blocked by blacklist.");
+        return ResultCodeEnum.ERROR_USER_BLOCKED_CODE;
+
+    }
+
+    private ResultCodeEnum userWasCreatedResult() {
+        log.info("User was created.");
+        return ResultCodeEnum.SUCCESS_CREATE_USER_CODE;
+    }
+
+    private void saveUser(UserEntity user) {
+        log.info("Saving user...");
+        userRepository.save(user);
+        log.info("User was saved.");
     }
 }
