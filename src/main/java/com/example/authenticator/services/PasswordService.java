@@ -1,9 +1,7 @@
 package com.example.authenticator.services;
 
-import com.example.authenticator.entities.AuthenticationAttemptEntity;
 import com.example.authenticator.entities.TemporaryPasswordEntity;
 import com.example.authenticator.enums.ResultCodeEnum;
-import com.example.authenticator.repositories.AuthenticationAttemptRepository;
 import com.example.authenticator.repositories.TemporaryPasswordRepository;
 import com.example.authenticator.security.HashCrypt;
 import lombok.extern.slf4j.Slf4j;
@@ -15,23 +13,20 @@ import java.util.UUID;
 @Service
 public class PasswordService {
 
-    public static final int MAX_ATTEMPTS = 3;
-
     private final TemporaryPasswordRepository temporaryPasswordRepository;
-    private final AuthenticationAttemptRepository attemptsRepository;
     private final SecurityService securityService;
     private final NotificationService notificationService;
+    private final UserService userService;
 
     public PasswordService(TemporaryPasswordRepository temporaryPasswordRepository,
-                           AuthenticationAttemptRepository attemptsRepository,
                            SecurityService securityService,
-                           NotificationService notificationService) {
+                           NotificationService notificationService,
+                           UserService userService) {
 
         this.temporaryPasswordRepository = temporaryPasswordRepository;
-        this.attemptsRepository = attemptsRepository;
         this.securityService = securityService;
         this.notificationService = notificationService;
-
+        this.userService = userService;
     }
 
     public ResultCodeEnum authenticate(String username, String encryptedPassword) {
@@ -42,10 +37,10 @@ public class PasswordService {
 
             log.info("Validating user in the main base.");
 
-            int attemptsCount = getAttemptsCount(username);
+            var authorizationResult = userService.isUnlocked(username);
 
-            if (exceedAttempts(attemptsCount))
-                return userBlockedByAttempts();
+            if (authorizationResult.failed())
+                return authorizationResult;
 
             var tempPassword = temporaryPasswordRepository.findById(username);
 
@@ -68,7 +63,7 @@ public class PasswordService {
                 }
             }
 
-            attemptsRepository.save(new AuthenticationAttemptEntity(username, attemptsCount + 1));
+            userService.notifyFailedAuthentication(username);
 
             return ResultCodeEnum.ERROR_USER_PASSWORD_CODE;
 
@@ -83,8 +78,10 @@ public class PasswordService {
 
         try {
 
-            if (exceedAttempts(username))
-                return userBlockedByAttempts();
+            var authorizationResult = userService.isUnlocked(username);
+
+            if (authorizationResult.failed())
+                return authorizationResult;
 
             if (tempPasswordHasIssued(username))
                 return userHasResetProcess(username);
@@ -113,29 +110,6 @@ public class PasswordService {
     private ResultCodeEnum userHasResetProcess(String username) {
         log.info("User '{}' has already a reset process.", username);
         return ResultCodeEnum.ERROR_TEMP_ALREADY_ISSUED_CODE;
-    }
-
-    private boolean exceedAttempts(String username) {
-
-        int attemptsCount = getAttemptsCount(username);
-
-        return exceedAttempts(attemptsCount);
-    }
-
-    private boolean exceedAttempts(int attempts) {
-        return attempts == MAX_ATTEMPTS;
-    }
-
-    private ResultCodeEnum userBlockedByAttempts() {
-        log.info("User was blocked.");
-        return ResultCodeEnum.ERROR_TEMP_USER_BLOCKED;
-    }
-
-    private int getAttemptsCount(String username) {
-
-        var attempts = attemptsRepository.findById(username);
-
-        return attempts.map(AuthenticationAttemptEntity::attempts).orElse(0);
     }
 
     private static String generateTemporaryPassword() {

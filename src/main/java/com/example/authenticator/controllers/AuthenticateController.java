@@ -50,6 +50,12 @@ public class AuthenticateController {
                         "User was temporarily blocked. Try again later.",
                         HttpStatus.UNAUTHORIZED));
 
+
+        responses.put(ResultCodeEnum.ERROR_USER_BLOCKED,
+                new ResultStatus(
+                        "User was blocked. Contact the administrator.",
+                        HttpStatus.UNAUTHORIZED));
+
         responses.put(ResultCodeEnum.ERROR_CODE,
                 new ResultStatus(
                         "An unknown error has ocurred. Try again later, if the error persists, contact the administrator.",

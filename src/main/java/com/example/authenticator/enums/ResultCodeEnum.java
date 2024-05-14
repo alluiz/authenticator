@@ -14,7 +14,8 @@ public enum ResultCodeEnum {
     ERROR_USER_PASSWORD_CODE("91"),
     ERROR_TEMP_ALREADY_ISSUED_CODE("92"),
     ERROR_NOTIFICATION_CODE("93"),
-    ERROR_TEMP_USER_BLOCKED("94");
+    ERROR_TEMP_USER_BLOCKED("94"),
+    ERROR_USER_BLOCKED("95");
 
     private final String value;
 
@@ -22,4 +23,7 @@ public enum ResultCodeEnum {
         this.value = value;
     }
 
+    public boolean failed() {
+        return !this.equals(SUCCESS_CODE);
+    }
 }

@@ -46,6 +46,11 @@ public class UserController {
                         "The notification service is UNAVAILABLE now. Try again later.",
                         HttpStatus.SERVICE_UNAVAILABLE));
 
+        responses.put(ResultCodeEnum.ERROR_USER_BLOCKED,
+                new ResultStatus(
+                        "User was blocked. Contact the administrator.",
+                        HttpStatus.UNAUTHORIZED));
+
         responses.put(ResultCodeEnum.ERROR_TEMP_USER_BLOCKED,
                 new ResultStatus(
                         "User was temporalily blocked. Try again later.",
