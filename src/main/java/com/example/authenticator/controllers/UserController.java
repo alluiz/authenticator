@@ -1,6 +1,7 @@
 package com.example.authenticator.controllers;
 
 import com.example.authenticator.dtos.*;
+import com.example.authenticator.enums.ResultCodeEnum;
 import com.example.authenticator.services.ResponseService;
 import com.example.authenticator.services.PasswordService;
 import com.example.authenticator.services.UserService;
@@ -22,7 +23,7 @@ public class UserController {
     }
 
     @PostMapping()
-    public ResponseEntity<ResultWithData<CreateUserResponse>> create(@RequestBody UserRequest userRequest) {
+    public ResponseEntity<Result<CreateUserResponse>> create(@RequestBody UserRequest userRequest) {
 
         var result = userService.create(userRequest);
         CreateUserResponse data = null;
@@ -31,21 +32,25 @@ public class UserController {
 
             var resetResult = passwordService.resetPassword(userRequest.username());
 
-            if (resetResult.code().failed()) {
-                userService.remove(userRequest.username());
+            if (resetResult.getCode().failed()) {
+
+                var removeCode = userService.remove(userRequest.username());
+
+                if (removeCode.failed())
+                    return responseService.getResponse(ResultCodeEnum.ERROR_CODE);
             }
             else if (passwordService.isEnabledShowTemporaryPassword())
-                data = new CreateUserResponse(resetResult.data().temporaryPassword());
+                data = new CreateUserResponse(resetResult.getData().temporaryPassword());
         }
 
-        return responseService.getResponseWithData(result, data);
+        return responseService.getResponse(result, data);
     }
 
     @PostMapping("/{userId}/reset")
-    public ResponseEntity<ResultWithData<ResetPasswordResponse>> resetPassword(@PathVariable("userId") String userId) {
+    public ResponseEntity<Result<ResetPasswordResponse>> resetPassword(@PathVariable("userId") String userId) {
 
         var result = passwordService.resetPassword(userId);
 
-        return responseService.getResponseWithData(result);
+        return responseService.getResponse(result);
     }
 }

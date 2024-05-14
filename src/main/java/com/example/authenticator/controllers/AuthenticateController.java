@@ -1,8 +1,8 @@
 package com.example.authenticator.controllers;
 
-import com.example.authenticator.dtos.Result;
 import com.example.authenticator.dtos.AuthenticationRequest;
-import com.example.authenticator.enums.ResultCodeEnum;
+import com.example.authenticator.dtos.AuthenticationResponse;
+import com.example.authenticator.dtos.Result;
 import com.example.authenticator.services.ResponseService;
 import com.example.authenticator.services.PasswordService;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +21,11 @@ public class AuthenticateController {
     }
 
     @PostMapping
-    public ResponseEntity<Result> authenticate(@RequestBody AuthenticationRequest authencationRequest) {
+    public ResponseEntity<Result<AuthenticationResponse>> authenticate(@RequestBody AuthenticationRequest authencationRequest) {
 
-        var code = passwordService.authenticate(authencationRequest.username(), authencationRequest.password());
+        var result = passwordService.authenticate(authencationRequest.username(), authencationRequest.password());
 
-        return responseService.getResponse(code);
+        return responseService.getResponse(result);
     }
 
 }

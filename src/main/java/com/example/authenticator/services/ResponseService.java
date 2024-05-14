@@ -1,8 +1,7 @@
 package com.example.authenticator.services;
 
-import com.example.authenticator.dtos.Result;
 import com.example.authenticator.dtos.ResultStatus;
-import com.example.authenticator.dtos.ResultWithData;
+import com.example.authenticator.dtos.Result;
 import com.example.authenticator.enums.ResultCodeEnum;
 import com.example.authenticator.models.ResultCodeAndData;
 import org.springframework.http.HttpStatus;
@@ -99,20 +98,18 @@ public class ResponseService {
                         HttpStatus.NO_CONTENT));
     }
 
-    public ResponseEntity<Result> getResponse(ResultCodeEnum code) {
-        var response = responses.get(code);
-        return new ResponseEntity<>(new Result(
-                code.getValue(), response.message(), new Date()), response.http());
+    public <T> ResponseEntity<Result<T>> getResponse(ResultCodeEnum code) {
+        return getResponse(code, null);
     }
 
-    public <T> ResponseEntity<ResultWithData<T>> getResponseWithData(ResultCodeEnum code, T data) {
+    public <T> ResponseEntity<Result<T>> getResponse(ResultCodeEnum code, T data) {
         var response = responses.get(code);
-        return new ResponseEntity<>(new ResultWithData<>(
+        return new ResponseEntity<>(new Result<>(
                 code.getValue(), response.message(), new Date(), data), response.http());
     }
 
-    public <T> ResponseEntity<ResultWithData<T>> getResponseWithData(ResultCodeAndData<T> resultCodeAndData) {
-        return getResponseWithData(resultCodeAndData.code(), resultCodeAndData.data());
+    public <T> ResponseEntity<Result<T>> getResponse(ResultCodeAndData<T> resultCodeAndData) {
+        return getResponse(resultCodeAndData.getCode(), resultCodeAndData.getData());
     }
 
 }

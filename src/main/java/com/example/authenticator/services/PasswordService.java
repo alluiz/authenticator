@@ -1,5 +1,6 @@
 package com.example.authenticator.services;
 
+import com.example.authenticator.dtos.AuthenticationResponse;
 import com.example.authenticator.dtos.ResetPasswordResponse;
 import com.example.authenticator.entities.TemporaryPasswordEntity;
 import com.example.authenticator.enums.ResultCodeEnum;
@@ -44,7 +45,7 @@ public class PasswordService {
         this.enabledShowTemporaryPassword = enabledShowTemporaryPassword;
     }
 
-    public ResultCodeEnum authenticate(String username, String encryptedPassword) {
+    public ResultCodeAndData<AuthenticationResponse> authenticate(String username, String encryptedPassword) {
 
         try {
 
@@ -53,7 +54,7 @@ public class PasswordService {
             var authorizationResult = userService.isAuthorized(username);
 
             if (authorizationResult.failed()) {
-                return authorizationFailedResult(authorizationResult);
+                return new ResultCodeAndData<>(authorizationFailedResult(authorizationResult));
             }
 
             var hasIssuedTempPassword = temporaryPasswordRepository.existsById(username);
@@ -65,11 +66,11 @@ public class PasswordService {
             if (authenticationResult.failed())
                 attemptsService.notify(username);
 
-            return authenticationResult;
+            return new ResultCodeAndData<>(authenticationResult, null);
 
         } catch (Exception e) {
             log.error("An unknown error has ocurred while authenticating.", e);
-            return ResultCodeEnum.ERROR_CODE;
+            return new ResultCodeAndData<>(ResultCodeEnum.ERROR_CODE);
         }
 
     }
