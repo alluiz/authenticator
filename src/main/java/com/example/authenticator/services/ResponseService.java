@@ -1,10 +1,14 @@
 package com.example.authenticator.services;
 
+import com.example.authenticator.dtos.Result;
 import com.example.authenticator.dtos.ResultStatus;
+import com.example.authenticator.dtos.ResultWithData;
 import com.example.authenticator.enums.ResultCodeEnum;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 
 @Service
@@ -45,7 +49,7 @@ public class ResponseService {
                         "The notification service is UNAVAILABLE now. Try again later.",
                         HttpStatus.SERVICE_UNAVAILABLE));
 
-        responses.put(ResultCodeEnum.ERROR_USER_BLOCKED,
+        responses.put(ResultCodeEnum.ERROR_USER_BLOCKED_CODE,
                 new ResultStatus(
                         "User was blocked. Contact the administrator.",
                         HttpStatus.UNAUTHORIZED));
@@ -54,6 +58,11 @@ public class ResponseService {
                 new ResultStatus(
                         "User was temporalily blocked. Try again later.",
                         HttpStatus.UNAUTHORIZED));
+
+        responses.put(ResultCodeEnum.ERROR_USER_ALREADY_EXISTS_CODE,
+                new ResultStatus(
+                        "User already exists.",
+                        HttpStatus.CONFLICT));
     }
 
     private void includeSuccessResponses() {
@@ -68,14 +77,37 @@ public class ResponseService {
                         "User authenticated with a temporary password. Must be changed before it expires.",
                         HttpStatus.OK));
 
-        responses.put(ResultCodeEnum.SUCCESS_RESET,
+        responses.put(ResultCodeEnum.SUCCESS_RESET_CODE,
                 new ResultStatus(
                         "The user's password has been successfully reset. He will be notified.",
                         HttpStatus.OK));
+
+        responses.put(ResultCodeEnum.SUCCESS_CREATE_USER_CODE,
+                new ResultStatus(
+                        "User was created.",
+                        HttpStatus.CREATED));
+
+        responses.put(ResultCodeEnum.SUCCESS_DELETE_USER_CODE,
+                new ResultStatus(
+                        "User was removed.",
+                        HttpStatus.NO_CONTENT));
+
+        responses.put(ResultCodeEnum.SUCCESS_NOTIFICATION_CODE,
+                new ResultStatus(
+                        "User was notified.",
+                        HttpStatus.NO_CONTENT));
     }
 
-    public ResultStatus getResponse(ResultCodeEnum code) {
-        return responses.get(code);
+    public ResponseEntity<Result> getResponse(ResultCodeEnum code) {
+        var response = responses.get(code);
+        return new ResponseEntity<>(new Result(
+                code.getValue(), response.message(), new Date()), response.http());
+    }
+
+    public <T> ResponseEntity<ResultWithData<T>> getResponseWithData(ResultCodeEnum code, T data) {
+        var response = responses.get(code);
+        return new ResponseEntity<>(new ResultWithData<>(
+                code.getValue(), response.message(), new Date(), data), response.http());
     }
 
 }

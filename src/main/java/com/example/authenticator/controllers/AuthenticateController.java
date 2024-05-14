@@ -25,15 +25,7 @@ public class AuthenticateController {
 
         var code = passwordService.authenticate(authencationRequest.username(), authencationRequest.password());
 
-        return getAuthenticationResponse(code);
-    }
-
-    private ResponseEntity<Result> getAuthenticationResponse(ResultCodeEnum code) {
-
-        var response = responseService.getResponse(code);
-
-        return new ResponseEntity<>(new Result(code.getValue(), response.message()), response.http());
-
+        return responseService.getResponse(code);
     }
 
 }

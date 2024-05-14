@@ -90,10 +90,12 @@ public class PasswordService {
 
             var notificationResult = notificationService.notify(tempPassword, username);
 
-            if (notificationResult.failed())
+            if (notificationResult.failed()) {
                 removeTemporaryPassword(username);
+                return notificationResult;
+            }
 
-            return notificationResult;
+            return ResultCodeEnum.SUCCESS_RESET_CODE;
 
         } catch (Exception e) {
             log.error("An unknown error has ocurred while resetting.", e);

@@ -10,7 +10,7 @@ public class NotificationService {
 
         try {
             System.out.println("Hello, " + destiny + "! here is your message: " + message);
-            return ResultCodeEnum.SUCCESS_CODE;
+            return ResultCodeEnum.SUCCESS_NOTIFICATION_CODE;
         } catch (Exception e) {
             return ResultCodeEnum.ERROR_NOTIFICATION_CODE;
         }

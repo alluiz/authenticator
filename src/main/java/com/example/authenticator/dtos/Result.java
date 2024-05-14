@@ -1,5 +1,7 @@
 package com.example.authenticator.dtos;
 
-public record Result(String code, String message) {
+import java.util.Date;
+
+public record Result(String code, String message, Date operationTime) {
 
 }
