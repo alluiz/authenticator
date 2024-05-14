@@ -42,12 +42,12 @@ public class PasswordService {
 
             log.info("Validating user in the main base.");
 
-            var tempPassword = temporaryPasswordRepository.findById(username);
-
             int attemptsCount = getAttemptsCount(username);
 
-            if (attemptsCount == 3)
-                return ResultCodeEnum.ERROR_TEMP_USER_BLOCKED;
+            if (exceedAttempts(attemptsCount))
+                return userBlockedByAttempts();
+
+            var tempPassword = temporaryPasswordRepository.findById(username);
 
             if (tempPassword.isPresent()) {
 
@@ -84,7 +84,7 @@ public class PasswordService {
         try {
 
             if (exceedAttempts(username))
-                return userBlockedByAttempts(username);
+                return userBlockedByAttempts();
 
             if (tempPasswordHasIssued(username))
                 return userHasResetProcess(username);
@@ -119,11 +119,15 @@ public class PasswordService {
 
         int attemptsCount = getAttemptsCount(username);
 
-        return attemptsCount == MAX_ATTEMPTS;
+        return exceedAttempts(attemptsCount);
     }
 
-    private ResultCodeEnum userBlockedByAttempts(String username) {
-        log.info("User '{}' was blocked.", username);
+    private boolean exceedAttempts(int attempts) {
+        return attempts == MAX_ATTEMPTS;
+    }
+
+    private ResultCodeEnum userBlockedByAttempts() {
+        log.info("User was blocked.");
         return ResultCodeEnum.ERROR_TEMP_USER_BLOCKED;
     }
 
