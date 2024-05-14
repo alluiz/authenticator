@@ -17,7 +17,7 @@ public class UserService {
         this.blackListService = blackListService;
     }
 
-    public ResultCodeEnum isUnlocked(String username) {
+    public ResultCodeEnum isAuthorized(String username) {
 
         if (attemptsService.check(username))
             return userBlockedByAttempts();

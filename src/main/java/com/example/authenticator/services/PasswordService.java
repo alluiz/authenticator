@@ -40,7 +40,7 @@ public class PasswordService {
 
             log.info("Validating user in the main base.");
 
-            var authorizationResult = userService.isUnlocked(username);
+            var authorizationResult = userService.isAuthorized(username);
 
             if (authorizationResult.failed())
                 return authorizationResult;
@@ -81,7 +81,7 @@ public class PasswordService {
 
         try {
 
-            var authorizationResult = userService.isUnlocked(username);
+            var authorizationResult = userService.isAuthorized(username);
 
             if (authorizationResult.failed())
                 return authorizationResult;
