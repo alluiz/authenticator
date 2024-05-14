@@ -27,6 +27,7 @@ public class PasswordService {
     private final UserService userService;
     private final AttemptsService attemptsService;
     private final boolean enabledShowTemporaryPassword;
+    private final boolean encryptionEnabled;
 
     public PasswordService(TemporaryPasswordRepository temporaryPasswordRepository,
                            TemporaryPasswordRepository passwordRepository,
@@ -34,7 +35,8 @@ public class PasswordService {
                            NotificationService notificationService,
                            UserService userService,
                            AttemptsService attemptsService,
-                           @Value("${service.password.temporary.show.enabled}") boolean enabledShowTemporaryPassword) {
+                           @Value("${service.password.temporary.show.enabled}") boolean enabledShowTemporaryPassword,
+                           @Value("${service.password.encrypt.enabled}") boolean encryptionEnabled) {
 
         this.temporaryPasswordRepository = temporaryPasswordRepository;
         this.passwordRepository = passwordRepository;
@@ -43,6 +45,7 @@ public class PasswordService {
         this.userService = userService;
         this.attemptsService = attemptsService;
         this.enabledShowTemporaryPassword = enabledShowTemporaryPassword;
+        this.encryptionEnabled = encryptionEnabled;
     }
 
     public ResultCodeAndData<AuthenticateResponse> authenticate(String username, String encryptedPassword) {
@@ -150,13 +153,13 @@ public class PasswordService {
 
     }
 
-    private ResultCodeEnum authenticateHash(String encryptedPassword, String passwordHash) {
+    private ResultCodeEnum authenticateHash(String password, String passwordHash) {
 
         try {
 
-            String password = securityService.decrypt(encryptedPassword);
+            String passwordInput = encryptionEnabled ? securityService.decrypt(password): password;
 
-            if (HashCrypt.matches(password, passwordHash)) {
+            if (HashCrypt.matches(passwordInput, passwordHash)) {
                 log.info("User was authenticated with success.");
                 return ResultCodeEnum.SUCCESS_TEMP_CODE;
             }
