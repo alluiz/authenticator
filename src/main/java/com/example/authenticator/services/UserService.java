@@ -29,10 +29,6 @@ public class UserService {
 
     }
 
-    public void notifyFailedAuthentication(String username) {
-        attemptsService.notify(username);
-    }
-
     private ResultCodeEnum userBlockedByBlackList() {
 
         log.info("User was blocked by blacklist.");

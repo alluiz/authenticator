@@ -17,16 +17,19 @@ public class PasswordService {
     private final SecurityService securityService;
     private final NotificationService notificationService;
     private final UserService userService;
+    private final AttemptsService attemptsService;
 
     public PasswordService(TemporaryPasswordRepository temporaryPasswordRepository,
                            SecurityService securityService,
                            NotificationService notificationService,
-                           UserService userService) {
+                           UserService userService,
+                           AttemptsService attemptsService) {
 
         this.temporaryPasswordRepository = temporaryPasswordRepository;
         this.securityService = securityService;
         this.notificationService = notificationService;
         this.userService = userService;
+        this.attemptsService = attemptsService;
     }
 
     public ResultCodeEnum authenticate(String username, String encryptedPassword) {
@@ -63,7 +66,7 @@ public class PasswordService {
                 }
             }
 
-            userService.notifyFailedAuthentication(username);
+            attemptsService.notify(username);
 
             return ResultCodeEnum.ERROR_USER_PASSWORD_CODE;
 
