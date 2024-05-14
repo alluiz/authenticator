@@ -1,16 +1,21 @@
 package com.example.authenticator.services;
 
+import com.example.authenticator.dtos.ResetPasswordResponse;
 import com.example.authenticator.entities.TemporaryPasswordEntity;
 import com.example.authenticator.enums.ResultCodeEnum;
+import com.example.authenticator.models.ResultCodeAndData;
 import com.example.authenticator.repositories.TemporaryPasswordRepository;
 import com.example.authenticator.security.HashCrypt;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Slf4j
 @Service
+@Getter
 public class PasswordService {
 
     private final TemporaryPasswordRepository temporaryPasswordRepository;
@@ -20,13 +25,15 @@ public class PasswordService {
     private final NotificationService notificationService;
     private final UserService userService;
     private final AttemptsService attemptsService;
+    private final boolean enabledShowTemporaryPassword;
 
     public PasswordService(TemporaryPasswordRepository temporaryPasswordRepository,
                            TemporaryPasswordRepository passwordRepository,
                            SecurityService securityService,
                            NotificationService notificationService,
                            UserService userService,
-                           AttemptsService attemptsService) {
+                           AttemptsService attemptsService,
+                           @Value("${service.password.temporary.show.enabled}") boolean enabledShowTemporaryPassword) {
 
         this.temporaryPasswordRepository = temporaryPasswordRepository;
         this.passwordRepository = passwordRepository;
@@ -34,6 +41,7 @@ public class PasswordService {
         this.notificationService = notificationService;
         this.userService = userService;
         this.attemptsService = attemptsService;
+        this.enabledShowTemporaryPassword = enabledShowTemporaryPassword;
     }
 
     public ResultCodeEnum authenticate(String username, String encryptedPassword) {
@@ -71,36 +79,30 @@ public class PasswordService {
         return authorizationResult;
     }
 
-    public ResultCodeEnum resetPassword(String username) {
+    public ResultCodeAndData<ResetPasswordResponse> resetPassword(String username) {
 
-        try {
+        log.info("User who would like to reset their own password: {}", username);
 
-            log.info("User who would like to reset their own password: {}", username);
+        var authorizationResult = userService.isAuthorized(username);
 
-            var authorizationResult = userService.isAuthorized(username);
-
-            if (authorizationResult.failed()) {
-                return authorizationFailedResult(authorizationResult);
-            }
-
-            if (tempPasswordHasIssued(username))
-                return userHasResetProcess(username);
-
-            String tempPassword = createTemporaryPassword(username);
-
-            var notificationResult = notificationService.notify(tempPassword, username);
-
-            if (notificationResult.failed()) {
-                removeTemporaryPassword(username);
-                return notificationResult;
-            }
-
-            return ResultCodeEnum.SUCCESS_RESET_CODE;
-
-        } catch (Exception e) {
-            log.error("An unknown error has ocurred while resetting.", e);
-            return ResultCodeEnum.ERROR_CODE;
+        if (authorizationResult.failed()) {
+            return new ResultCodeAndData<>(authorizationFailedResult(authorizationResult), null);
         }
+
+        if (tempPasswordHasIssued(username))
+            return new ResultCodeAndData<>(userHasResetProcess(username), null);
+
+        String tempPassword = createTemporaryPassword(username);
+
+        var notificationResult = notificationService.notify(tempPassword, username);
+
+        if (notificationResult.failed()) {
+            removeTemporaryPassword(username);
+            return new ResultCodeAndData<>(notificationResult, null);
+        }
+
+        return new ResultCodeAndData<>(ResultCodeEnum.SUCCESS_RESET_CODE,
+                enabledShowTemporaryPassword ? new ResetPasswordResponse(tempPassword): null);
 
     }
 

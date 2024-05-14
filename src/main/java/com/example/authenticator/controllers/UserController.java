@@ -1,7 +1,6 @@
 package com.example.authenticator.controllers;
 
-import com.example.authenticator.dtos.Result;
-import com.example.authenticator.dtos.UserRequest;
+import com.example.authenticator.dtos.*;
 import com.example.authenticator.services.ResponseService;
 import com.example.authenticator.services.PasswordService;
 import com.example.authenticator.services.UserService;
@@ -23,28 +22,30 @@ public class UserController {
     }
 
     @PostMapping()
-    public ResponseEntity<Result> create(@RequestBody UserRequest userRequest) {
+    public ResponseEntity<ResultWithData<CreateUserResponse>> create(@RequestBody UserRequest userRequest) {
 
         var result = userService.create(userRequest);
+        CreateUserResponse data = null;
 
-        if (!result.failed()) {
+        if (!result.failed() && userRequest.withTemporaryPassword()) {
 
             var resetResult = passwordService.resetPassword(userRequest.username());
 
-            if (resetResult.failed()) {
+            if (resetResult.code().failed()) {
                 userService.remove(userRequest.username());
-                return responseService.getResponse(resetResult);
             }
+            else if (passwordService.isEnabledShowTemporaryPassword())
+                data = new CreateUserResponse(resetResult.data().temporaryPassword());
         }
 
-        return responseService.getResponse(result);
+        return responseService.getResponseWithData(result, data);
     }
 
     @PostMapping("/{userId}/reset")
-    public ResponseEntity<Result> resetPassword(@PathVariable("userId") String userId) {
+    public ResponseEntity<ResultWithData<ResetPasswordResponse>> resetPassword(@PathVariable("userId") String userId) {
 
-        var code = passwordService.resetPassword(userId);
+        var result = passwordService.resetPassword(userId);
 
-        return responseService.getResponse(code);
+        return responseService.getResponseWithData(result);
     }
 }

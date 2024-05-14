@@ -4,6 +4,7 @@ import com.example.authenticator.dtos.Result;
 import com.example.authenticator.dtos.ResultStatus;
 import com.example.authenticator.dtos.ResultWithData;
 import com.example.authenticator.enums.ResultCodeEnum;
+import com.example.authenticator.models.ResultCodeAndData;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -108,6 +109,10 @@ public class ResponseService {
         var response = responses.get(code);
         return new ResponseEntity<>(new ResultWithData<>(
                 code.getValue(), response.message(), new Date(), data), response.http());
+    }
+
+    public <T> ResponseEntity<ResultWithData<T>> getResponseWithData(ResultCodeAndData<T> resultCodeAndData) {
+        return getResponseWithData(resultCodeAndData.code(), resultCodeAndData.data());
     }
 
 }
