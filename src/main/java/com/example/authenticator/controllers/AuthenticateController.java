@@ -1,7 +1,7 @@
 package com.example.authenticator.controllers;
 
-import com.example.authenticator.dtos.AuthenticationRequest;
-import com.example.authenticator.dtos.AuthenticationResponse;
+import com.example.authenticator.dtos.authenticate.AuthenticateRequest;
+import com.example.authenticator.dtos.authenticate.AuthenticateResponse;
 import com.example.authenticator.dtos.Result;
 import com.example.authenticator.services.ResponseService;
 import com.example.authenticator.services.PasswordService;
@@ -21,7 +21,7 @@ public class AuthenticateController {
     }
 
     @PostMapping
-    public ResponseEntity<Result<AuthenticationResponse>> authenticate(@RequestBody AuthenticationRequest authencationRequest) {
+    public ResponseEntity<Result<AuthenticateResponse>> authenticate(@RequestBody AuthenticateRequest authencationRequest) {
 
         var result = passwordService.authenticate(authencationRequest.username(), authencationRequest.password());
 

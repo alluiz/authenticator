@@ -1,6 +1,9 @@
 package com.example.authenticator.controllers;
 
 import com.example.authenticator.dtos.*;
+import com.example.authenticator.dtos.user.CreateUserResponse;
+import com.example.authenticator.dtos.user.ResetPasswordResponse;
+import com.example.authenticator.dtos.user.UserRequest;
 import com.example.authenticator.enums.ResultCodeEnum;
 import com.example.authenticator.services.ResponseService;
 import com.example.authenticator.services.PasswordService;

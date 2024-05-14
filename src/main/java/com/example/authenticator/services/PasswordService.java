@@ -1,7 +1,7 @@
 package com.example.authenticator.services;
 
-import com.example.authenticator.dtos.AuthenticationResponse;
-import com.example.authenticator.dtos.ResetPasswordResponse;
+import com.example.authenticator.dtos.authenticate.AuthenticateResponse;
+import com.example.authenticator.dtos.user.ResetPasswordResponse;
 import com.example.authenticator.entities.TemporaryPasswordEntity;
 import com.example.authenticator.enums.ResultCodeEnum;
 import com.example.authenticator.models.ResultCodeAndData;
@@ -45,7 +45,7 @@ public class PasswordService {
         this.enabledShowTemporaryPassword = enabledShowTemporaryPassword;
     }
 
-    public ResultCodeAndData<AuthenticationResponse> authenticate(String username, String encryptedPassword) {
+    public ResultCodeAndData<AuthenticateResponse> authenticate(String username, String encryptedPassword) {
 
         try {
 

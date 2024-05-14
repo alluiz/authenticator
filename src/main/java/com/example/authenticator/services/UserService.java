@@ -1,6 +1,6 @@
 package com.example.authenticator.services;
 
-import com.example.authenticator.dtos.UserRequest;
+import com.example.authenticator.dtos.user.UserRequest;
 import com.example.authenticator.entities.UserEntity;
 import com.example.authenticator.enums.ResultCodeEnum;
 import com.example.authenticator.repositories.UserRepository;
