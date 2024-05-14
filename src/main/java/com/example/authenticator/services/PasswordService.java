@@ -40,14 +40,13 @@ public class PasswordService {
 
         try {
 
-            log.info("Username: {}", username);
-
-            log.info("Validating user in the main base.");
+            log.info("User who would like to authenticate: {}", username);
 
             var authorizationResult = userService.isAuthorized(username);
 
-            if (authorizationResult.failed())
-                return authorizationResult;
+            if (authorizationResult.failed()) {
+                return authorizationFailedResult(authorizationResult);
+            }
 
             var hasIssuedTempPassword = temporaryPasswordRepository.existsById(username);
 
@@ -67,37 +66,61 @@ public class PasswordService {
 
     }
 
+    private static ResultCodeEnum authorizationFailedResult(ResultCodeEnum authorizationResult) {
+        log.info("User is not authorized to perform this action. Check UserService logs for more details about it.");
+        return authorizationResult;
+    }
+
     public ResultCodeEnum resetPassword(String username) {
 
         try {
 
+            log.info("User who would like to reset their own password: {}", username);
+
             var authorizationResult = userService.isAuthorized(username);
 
-            if (authorizationResult.failed())
-                return authorizationResult;
+            if (authorizationResult.failed()) {
+                return authorizationFailedResult(authorizationResult);
+            }
 
             if (tempPasswordHasIssued(username))
                 return userHasResetProcess(username);
 
-            String tempPassword = generateTemporaryPassword();
+            String tempPassword = createTemporaryPassword(username);
 
-            String hashPassword = HashCrypt.hash(tempPassword);
+            var notificationResult = notificationService.notify(tempPassword, username);
 
-            var tempPasswordEntity = new TemporaryPasswordEntity(username, hashPassword);
+            if (notificationResult.failed())
+                removeTemporaryPassword(username);
 
-            temporaryPasswordRepository.save(tempPasswordEntity);
-
-            if (notificationService.notify(tempPassword, username))
-                return ResultCodeEnum.SUCCESS_CODE;
-            else {
-                temporaryPasswordRepository.deleteById(username);
-                return ResultCodeEnum.ERROR_NOTIFICATION_CODE;
-            }
+            return notificationResult;
 
         } catch (Exception e) {
+            log.error("An unknown error has ocurred while resetting.", e);
             return ResultCodeEnum.ERROR_CODE;
         }
 
+    }
+
+    private String createTemporaryPassword(String username) {
+
+        String tempPassword = generateTemporaryPassword();
+        String hashPassword = HashCrypt.hash(tempPassword);
+        saveTemporaryPassword(username, hashPassword);
+
+        return tempPassword;
+
+    }
+
+    private void saveTemporaryPassword(String username, String hashPassword) {
+        log.info("Saving temporary password.");
+        var tempPasswordEntity = new TemporaryPasswordEntity(username, hashPassword);
+        temporaryPasswordRepository.save(tempPasswordEntity);
+    }
+
+    private void removeTemporaryPassword(String username) {
+        log.info("Removing temporary password.");
+        temporaryPasswordRepository.deleteById(username);
     }
 
     private ResultCodeEnum authenticatePassword(String username, String encryptedPassword) {
