@@ -1,4 +1,4 @@
-package com.example.demo.exceptions;
+package com.example.authenticator.exceptions;
 
 public class RSAServerException extends RuntimeException {
 

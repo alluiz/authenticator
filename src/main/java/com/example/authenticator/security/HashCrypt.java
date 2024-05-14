@@ -1,4 +1,4 @@
-package com.example.demo.security;
+package com.example.authenticator.security;
 
 import org.springframework.lang.NonNull;
 

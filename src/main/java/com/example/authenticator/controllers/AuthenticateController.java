@@ -1,10 +1,10 @@
-package com.example.demo.controllers;
+package com.example.authenticator.controllers;
 
-import com.example.demo.dtos.Result;
-import com.example.demo.dtos.AuthenticationRequest;
-import com.example.demo.dtos.ResultStatus;
-import com.example.demo.enums.ResultCodeEnum;
-import com.example.demo.services.PasswordService;
+import com.example.authenticator.dtos.Result;
+import com.example.authenticator.dtos.AuthenticationRequest;
+import com.example.authenticator.dtos.ResultStatus;
+import com.example.authenticator.enums.ResultCodeEnum;
+import com.example.authenticator.services.PasswordService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

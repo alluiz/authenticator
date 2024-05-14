@@ -1,6 +1,6 @@
-package com.example.demo.security;
+package com.example.authenticator.security;
 
-import com.example.demo.exceptions.RSAServerException;
+import com.example.authenticator.exceptions.RSAServerException;
 
 import javax.crypto.Cipher;
 import java.security.*;

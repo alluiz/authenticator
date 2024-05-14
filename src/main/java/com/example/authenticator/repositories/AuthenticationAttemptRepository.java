@@ -1,6 +1,6 @@
-package com.example.demo.repositories;
+package com.example.authenticator.repositories;
 
-import com.example.demo.entities.AuthenticationAttemptEntity;
+import com.example.authenticator.entities.AuthenticationAttemptEntity;
 import org.springframework.data.repository.CrudRepository;
 
 public interface AuthenticationAttemptRepository extends CrudRepository<AuthenticationAttemptEntity, String> {

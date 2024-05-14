@@ -1,7 +1,7 @@
-package com.example.demo.services;
+package com.example.authenticator.services;
 
-import com.example.demo.exceptions.RSAServerException;
-import com.example.demo.security.RSACrypt;
+import com.example.authenticator.exceptions.RSAServerException;
+import com.example.authenticator.security.RSACrypt;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;

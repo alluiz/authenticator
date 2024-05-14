@@ -1,11 +1,11 @@
-package com.example.demo.services;
+package com.example.authenticator.services;
 
-import com.example.demo.entities.AuthenticationAttemptEntity;
-import com.example.demo.entities.TemporaryPasswordEntity;
-import com.example.demo.enums.ResultCodeEnum;
-import com.example.demo.repositories.AuthenticationAttemptRepository;
-import com.example.demo.repositories.TemporaryPasswordRepository;
-import com.example.demo.security.HashCrypt;
+import com.example.authenticator.entities.AuthenticationAttemptEntity;
+import com.example.authenticator.entities.TemporaryPasswordEntity;
+import com.example.authenticator.enums.ResultCodeEnum;
+import com.example.authenticator.repositories.AuthenticationAttemptRepository;
+import com.example.authenticator.repositories.TemporaryPasswordRepository;
+import com.example.authenticator.security.HashCrypt;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
