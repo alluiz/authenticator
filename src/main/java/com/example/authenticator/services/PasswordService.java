@@ -28,9 +28,9 @@ public class PasswordService {
                            NotificationService notificationService) {
 
         this.temporaryPasswordRepository = temporaryPasswordRepository;
+        this.attemptsRepository = attemptsRepository;
         this.securityService = securityService;
         this.notificationService = notificationService;
-        this.attemptsRepository = attemptsRepository;
 
     }
 
