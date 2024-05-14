@@ -49,6 +49,9 @@ public class UserService {
 
     public ResultCodeEnum isAuthorized(String username) {
 
+        if (!exists(username))
+            return userNotExists();
+
         if (attemptsService.check(username))
             return userBlockedByAttempts();
 
@@ -88,6 +91,13 @@ public class UserService {
 
         log.info("User was blocked by blacklist.");
         return ResultCodeEnum.ERROR_USER_BLOCKED_CODE;
+
+    }
+
+    private ResultCodeEnum userNotExists() {
+
+        log.info("User was not found.");
+        return ResultCodeEnum.ERROR_USER_PASSWORD_CODE;
 
     }
 
