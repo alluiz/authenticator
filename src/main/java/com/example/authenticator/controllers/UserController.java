@@ -29,24 +29,30 @@ public class UserController {
     public ResponseEntity<Result<CreateUserResponse>> create(@RequestBody UserRequest userRequest) {
 
         var result = userService.create(userRequest);
-        CreateUserResponse data = null;
 
-        if (!result.failed() && userRequest.withTemporaryPassword()) {
+        if (!result.failed()) {
 
-            var resetResult = passwordService.resetPassword(userRequest.username());
+            if (userRequest.withTemporaryPassword()) {
 
-            if (resetResult.getCode().failed()) {
+                var resetResult = passwordService.resetPassword(userRequest.username());
 
-                var removeCode = userService.remove(userRequest.username());
+                if (resetResult.getCode().failed()) {
 
-                if (removeCode.failed())
-                    return responseService.getResponse(ResultCodeEnum.ERROR_CODE);
+                    var removeCode = userService.remove(userRequest.username());
+
+                    if (removeCode.failed())
+                        return responseService.getResponse(ResultCodeEnum.ERROR_CODE);
+                }
+                else if (passwordService.isEnabledShowTemporaryPassword()) {
+                    var data = new CreateUserResponse(resetResult.getData().temporaryPassword());
+                    return responseService.getResponse(result, data);
+                }
+
             }
-            else if (passwordService.isEnabledShowTemporaryPassword())
-                data = new CreateUserResponse(resetResult.getData().temporaryPassword());
+
         }
 
-        return responseService.getResponse(result, data);
+        return responseService.getResponse(result);
     }
 
     @PostMapping("/{userId}/reset")
