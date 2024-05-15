@@ -19,7 +19,7 @@ public class SecurityService {
     private final PrivateKey privateKey;
 
     public SecurityService(FileService fileService,
-                           @Value("${service.security.private.key.path}") String privateKeyPath) {
+                           @Value("${service.security.key}") String privateKeyPath) {
 
         this.fileService = fileService;
         this.privateKey = loadPrivateKey(privateKeyPath);

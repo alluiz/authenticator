@@ -35,8 +35,8 @@ public class PasswordService {
                            NotificationService notificationService,
                            UserService userService,
                            AttemptsService attemptsService,
-                           @Value("${service.password.temporary.show.enabled}") boolean enabledShowTemporaryPassword,
-                           @Value("${service.password.encrypt.enabled}") boolean encryptionEnabled) {
+                           @Value("${service.password.encrypt}") boolean encryptionEnabled,
+                           @Value("${service.password.temp.show}") boolean enabledShowTemporaryPassword) {
 
         this.temporaryPasswordRepository = temporaryPasswordRepository;
         this.passwordRepository = passwordRepository;
