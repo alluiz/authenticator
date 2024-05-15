@@ -4,21 +4,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class BlackListService extends ToogleService {
 
-    public BlackListService(@Value("${service.attempts.enabled}") 
-                               boolean enabled) {
-        super(enabled);
+    private final List<String> values;
+
+    public BlackListService(@Value("${service.blacklist.enabled}") boolean enabled,
+                            @Value("${service.blacklist.value}") String value) {
+        super(enabled & !value.trim().isEmpty());
+        this.values = Arrays.stream(value.trim().split(",")).toList();
     }
 
     public boolean check(String username) {
-        
-        var black = new ArrayList<String>();
-        black.add("luiz");
 
-        return this.isEnabled() && black.contains(username);
+        return this.isEnabled() && values.contains(username);
 
     }
 

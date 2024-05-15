@@ -89,7 +89,7 @@ public class UserService {
 
     private ResultCodeEnum userBlockedByBlackList() {
 
-        log.info("User was blocked by blacklist.");
+        log.warn("User was blocked by blacklist.");
         return ResultCodeEnum.ERROR_USER_BLOCKED_CODE;
 
     }
