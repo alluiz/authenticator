@@ -15,7 +15,7 @@ public class AttemptsService extends ToogleService {
     public AttemptsService(@Value("${service.attempts.enabled}") boolean enabled,
                            @Value("${service.attempts.value}") int maxAttempts,
                            AuthenticationAttemptRepository attemptsRepository) {
-        super(enabled);
+        super(enabled & maxAttempts > 0);
         this.maxAttempts = maxAttempts;
         this.attemptsRepository = attemptsRepository;
     }
