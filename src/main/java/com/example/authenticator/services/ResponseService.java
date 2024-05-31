@@ -69,6 +69,11 @@ public class ResponseService {
 
         responses.put(ResultCodeEnum.SUCCESS_CODE,
                 new ResultStatus(
+                        "Operation was done with success.",
+                        HttpStatus.OK));
+
+        responses.put(ResultCodeEnum.SUCCESS_AUTH_CODE,
+                new ResultStatus(
                         "User authenticated with success.",
                         HttpStatus.OK));
 

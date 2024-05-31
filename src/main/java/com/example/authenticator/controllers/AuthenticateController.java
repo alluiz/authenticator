@@ -10,13 +10,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/authenticate")
-public class AuthenticateController {
+public class AuthenticateController extends BaseController {
 
-    private final ResponseService responseService;
     private final PasswordService passwordService;
 
     public AuthenticateController(ResponseService responseService, PasswordService passwordService) {
-        this.responseService = responseService;
+        super(responseService);
         this.passwordService = passwordService;
     }
 

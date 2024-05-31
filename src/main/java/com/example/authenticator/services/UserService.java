@@ -58,7 +58,7 @@ public class UserService {
         if (blackListService.check(username))
             return userBlockedByBlackList();
 
-        return ResultCodeEnum.SUCCESS_CODE;
+        return ResultCodeEnum.SUCCESS_AUTH_CODE;
 
     }
 

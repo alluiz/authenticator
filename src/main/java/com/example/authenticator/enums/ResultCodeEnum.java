@@ -12,6 +12,7 @@ public enum ResultCodeEnum {
     SUCCESS_TEMP_CODE("003"),
     SUCCESS_CREATE_USER_CODE("004"),
     SUCCESS_DELETE_USER_CODE("005"),
+    SUCCESS_AUTH_CODE("006"),
 
     //ERRORS = 1XX
     ERROR_CODE("100"),

@@ -13,14 +13,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
-public class UserController {
+public class UserController extends BaseController {
 
-    private final ResponseService responseService;
     private final PasswordService passwordService;
     private final UserService userService;
 
     public UserController(ResponseService responseService, PasswordService passwordService, UserService userService) {
-        this.responseService = responseService;
+        super(responseService);
         this.passwordService = passwordService;
         this.userService = userService;
     }

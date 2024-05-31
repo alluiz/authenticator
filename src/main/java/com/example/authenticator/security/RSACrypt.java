@@ -1,38 +1,43 @@
 package com.example.authenticator.security;
 
 import com.example.authenticator.exceptions.RSAServerException;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 
 import javax.crypto.Cipher;
 import java.security.*;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 public class RSACrypt {
 
-        public static PrivateKey readRSAPrivateKeyFromPEM(String privateKeyPEM) {
+    public static PrivateKey readRSAPrivateKeyFromPEM(String privateKeyPEM) {
 
-            try {
+        try {
 
-                Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
-                privateKeyPEM = privateKeyPEM
-                        .replace("-----BEGIN RSA PRIVATE KEY-----", "")
-                        .replaceAll(System.lineSeparator(), "")
-                        .replace("-----END RSA PRIVATE KEY-----", "");
+            privateKeyPEM = privateKeyPEM
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replaceAll(System.lineSeparator(), "")
+                    .replace("-----END PRIVATE KEY-----", "");
 
-                byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
-                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
+            KeyFactory keyFactory = getKeyFactory();
+            byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
 
-                return keyFactory.generatePrivate(keySpec);
+            return keyFactory.generatePrivate(keySpec);
 
-            } catch (Exception e) {
-                throw new RSAServerException("Error while loading private key from PEM file.", e);
-            }
-
+        } catch (Exception e) {
+            throw new RSAServerException("Error while loading private key from PEM file.", e);
         }
 
-        public static PublicKey readRSAPublicKeyFromPEM(String publicKeyPEM) {
+    }
+
+    public static PublicKey readRSAPublicKeyFromPEM(String publicKeyPEM) {
 
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
@@ -44,7 +49,7 @@ public class RSACrypt {
                         .replace("-----END RSA PUBLIC KEY-----", "");
 
                 byte[] encoded = Base64.getDecoder().decode(publicKeyPEM);
-                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                KeyFactory keyFactory = getKeyFactory();
                 PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
 
                 return keyFactory.generatePublic(keySpec);
@@ -55,54 +60,72 @@ public class RSACrypt {
 
         }
 
-        public static KeyPair generateKeyPair()  {
+    public static PublicKey readRSAPublicKeyFromPrivateKey(PrivateKey privateKey) {
 
-            try {
+        try {
 
-                KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-                keyPairGenerator.initialize(2048); // Key size (bits)
+            // Generate the public key from the private key
+            KeyFactory keyFactory = getKeyFactory();
+            RSAPrivateCrtKey privk = (RSAPrivateCrtKey)privateKey;
 
-                return keyPairGenerator.generateKeyPair();
+            RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(privk.getModulus(), privk.getPublicExponent());
 
-            } catch (Exception e) {
-                throw new SecurityException("Error while generating RSA Key Pair", e);
-            }
+            return keyFactory.generatePublic(publicKeySpec);
+
+        } catch (Exception e) {
+            throw new RSAServerException("Error while loading public key from private key.", e);
         }
 
-        public static String encrypt(String plainText, AsymmetricKey key) {
+    }
 
-            Cipher cipher = getCipher(key, Cipher.ENCRYPT_MODE);
+    public static KeyPair generateKeyPair()  {
 
-            try {
+        try {
 
-                byte[] encryptedBytes = Base64.getDecoder().decode(plainText);
-                byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(2048); // Key size (bits)
 
-                return new String(decryptedBytes);
+            return keyPairGenerator.generateKeyPair();
 
-            } catch (Exception e) {
-                throw new SecurityException("Error while crypting with RSA algorithm.", e);
-            }
+        } catch (Exception e) {
+            throw new SecurityException("Error while generating RSA Key Pair", e);
+        }
+    }
 
+    public static String encrypt(String plainText, AsymmetricKey key) {
+
+        Cipher cipher = getCipher(key, Cipher.ENCRYPT_MODE);
+
+        try {
+
+            byte[] encryptedBytes = Base64.getDecoder().decode(plainText);
+            byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+
+            return new String(decryptedBytes);
+
+        } catch (Exception e) {
+            throw new SecurityException("Error while crypting with RSA algorithm.", e);
         }
 
-        public static String decrypt(String encryptedText, AsymmetricKey key) {
+    }
 
-            Cipher cipher = getCipher(key, Cipher.DECRYPT_MODE);
+    public static String decrypt(String encryptedText, AsymmetricKey key) {
 
-            try {
+        Cipher cipher = getCipher(key, Cipher.DECRYPT_MODE);
 
-                byte[] encryptedBytes = Base64.getDecoder().decode(encryptedText);
-                byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+        try {
 
-                return new String(decryptedBytes);
+            byte[] encryptedBytes = Base64.getDecoder().decode(encryptedText);
+            byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
 
-            } catch (Exception e) {
-                throw new SecurityException("Error while decrypting with RSA algorithm.", e);
-            }
+            return new String(decryptedBytes);
+
+        } catch (Exception e) {
+            throw new SecurityException("Error while decrypting with RSA algorithm.", e);
         }
+    }
 
-        private static Cipher getCipher(AsymmetricKey key, int mode) {
+    private static Cipher getCipher(AsymmetricKey key, int mode) {
 
             try {
 
@@ -116,4 +139,8 @@ public class RSACrypt {
             }
 
         }
+
+    private static KeyFactory getKeyFactory() throws NoSuchAlgorithmException {
+        return KeyFactory.getInstance("RSA");
+    }
 }
