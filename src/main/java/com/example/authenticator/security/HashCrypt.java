@@ -1,6 +1,6 @@
 package com.example.authenticator.security;
 
-import org.springframework.lang.NonNull;
+import org.springframework.util.Assert;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -15,12 +15,15 @@ public class HashCrypt {
 
     }
 
-    public static String hash(@NonNull String plainText) {
+    public static String hash(String plainText) {
+
+        Assert.notNull(plainText, "The plaintText must be not null.");
+        Assert.hasLength(plainText.trim(), "The plaintText must be not empty.");
 
         try {
 
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] encodedHash = digest.digest(plainText.getBytes(StandardCharsets.UTF_8));
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] encodedHash = md.digest(plainText.getBytes(StandardCharsets.UTF_8));
 
             // Convert the hash bytes to a hexadecimal string
             return bytesToHex(encodedHash);
