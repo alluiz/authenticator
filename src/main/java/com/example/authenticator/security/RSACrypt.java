@@ -1,14 +1,11 @@
 package com.example.authenticator.security;
 
 import com.example.authenticator.exceptions.RSAServerException;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 
 import javax.crypto.Cipher;
 import java.security.*;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.RSAPublicKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.security.spec.PKCS8EncodedKeySpec;
 
@@ -92,7 +89,7 @@ public class RSACrypt {
         }
     }
 
-    public static String encrypt(String plainText, AsymmetricKey key) {
+    public static String encrypt(String plainText, Key key) {
 
         Cipher cipher = getCipher(key, Cipher.ENCRYPT_MODE);
 
@@ -109,7 +106,7 @@ public class RSACrypt {
 
     }
 
-    public static String decrypt(String encryptedText, AsymmetricKey key) {
+    public static String decrypt(String encryptedText, Key key) {
 
         Cipher cipher = getCipher(key, Cipher.DECRYPT_MODE);
 
@@ -125,7 +122,7 @@ public class RSACrypt {
         }
     }
 
-    private static Cipher getCipher(AsymmetricKey key, int mode) {
+    private static Cipher getCipher(Key key, int mode) {
 
             try {
 
