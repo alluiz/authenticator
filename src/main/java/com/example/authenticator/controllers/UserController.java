@@ -1,11 +1,10 @@
 package com.example.authenticator.controllers;
 
-import com.example.authenticator.dtos.*;
+import com.example.authenticator.dtos.Result;
 import com.example.authenticator.dtos.user.CreateUserResponse;
 import com.example.authenticator.dtos.user.ResetPasswordResponse;
 import com.example.authenticator.dtos.user.UserRequest;
 import com.example.authenticator.enums.ResultCodeEnum;
-import com.example.authenticator.services.ResponseService;
 import com.example.authenticator.services.PasswordService;
 import com.example.authenticator.services.UserService;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +17,7 @@ public class UserController extends BaseController {
     private final PasswordService passwordService;
     private final UserService userService;
 
-    public UserController(ResponseService responseService, PasswordService passwordService, UserService userService) {
-        super(responseService);
+    public UserController(PasswordService passwordService, UserService userService) {
         this.passwordService = passwordService;
         this.userService = userService;
     }
@@ -40,18 +38,20 @@ public class UserController extends BaseController {
                     var removeCode = userService.remove(userRequest.username());
 
                     if (removeCode.failed())
-                        return responseService.getResponse(ResultCodeEnum.ERROR_CODE);
+                        return getResponse(ResultCodeEnum.ERROR_CODE);
+                    else
+                        return getResponse(resetResult.getCode());
                 }
                 else if (passwordService.isEnabledShowTemporaryPassword()) {
                     var data = new CreateUserResponse(resetResult.getData().temporaryPassword());
-                    return responseService.getResponse(result, data);
+                    return getResponse(result, data);
                 }
 
             }
 
         }
 
-        return responseService.getResponse(result);
+        return getResponse(result);
     }
 
     @PostMapping("/{userId}/reset")
@@ -59,6 +59,6 @@ public class UserController extends BaseController {
 
         var result = passwordService.resetPassword(userId);
 
-        return responseService.getResponse(result);
+        return getResponse(result);
     }
 }

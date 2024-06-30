@@ -2,11 +2,11 @@ package com.example.authenticator.controllers;
 
 import com.example.authenticator.dtos.Result;
 import com.example.authenticator.dtos.security.PublicKeyResponse;
-import com.example.authenticator.dtos.user.ResetPasswordResponse;
-import com.example.authenticator.services.ResponseService;
 import com.example.authenticator.services.SecurityService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/security")
@@ -14,8 +14,8 @@ public class SecurityController extends BaseController  {
 
     private final SecurityService securityService;
 
-    protected SecurityController(ResponseService responseService, SecurityService securityService) {
-        super(responseService);
+    protected SecurityController(SecurityService securityService) {
+        super();
         this.securityService = securityService;
     }
 
@@ -24,7 +24,7 @@ public class SecurityController extends BaseController  {
 
         var result = securityService.getPublicKey();
 
-        return responseService.getResponse(result);
+        return getResponse(result);
     }
 
 }
